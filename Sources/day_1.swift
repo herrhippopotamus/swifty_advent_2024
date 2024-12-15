@@ -1,5 +1,6 @@
 import Foundation
 
+// parsing the puzzle with regex improves runtime performance, but only by abouth 20 %
 func parseNumbersRegex(_ input: String) -> ([Int],[Int]) {
     let xsRegex = try! Regex(#"\d+"#)
 
@@ -11,10 +12,8 @@ func parseNumbersRegex(_ input: String) -> ([Int],[Int]) {
 
     for (i, d) in  input.matches(of: xsRegex)
         .compactMap({ match in
-            // Convert the matched substring to an integer
             Int(input[match.range]) 
         }).enumerated() {
-        // Use the index to assign the numbers to the appropriate arrays
         if i % 2 == 0 {
             xs.append(d)
         } else {
@@ -24,6 +23,7 @@ func parseNumbersRegex(_ input: String) -> ([Int],[Int]) {
     return (xs, ys)
 }
 
+// parsing the puzzle: first approach without regex
 func parseNumbers(_ input: String) -> ([Int],[Int]) {
     var xs = [Int]();
     var ys = [Int]();
