@@ -1,63 +1,67 @@
 import Foundation
+import Algorithms
 
-// parsing the puzzle with regex improves runtime performance, but only by abouth 20 %
-func parseNumbersRegex(_ input: String) -> ([Int],[Int]) {
-    let xsRegex = try! Regex(#"\d+"#)
-
-    var xs: [Int] = []
-    var ys: [Int] = []
+func parseNumbers(_ input: String) -> ([Int],[Int]) {
+    var xs = [Int]()
+    var ys = [Int]()
 
     xs.reserveCapacity(1000)
     ys.reserveCapacity(1000)
-
-    for (i, d) in  input.matches(of: xsRegex)
-        .compactMap({ match in
-            Int(input[match.range]) 
-        }).enumerated() {
-        if i % 2 == 0 {
-            xs.append(d)
-        } else {
-            ys.append(d)
+    var xsTurn = true
+    
+    input.utf8.withContiguousStorageIfAvailable { data in
+        var start = 0
+        for i in 0..<data.endIndex {
+            if (data[i] == 32 || data[i] == 10) {
+                if start < i {
+                    let num = Int(
+                        String(decoding: UnsafeBufferPointer(rebasing: data[start..<i]), as: UTF8.self)
+                    )!
+                    
+                    if xsTurn {
+                        xs.append(num)
+                    }else{
+                        ys.append(num)
+                    }
+                    xsTurn.toggle()
+                }
+                start = i + 1
+            }
         }
     }
     return (xs, ys)
 }
-
-// parsing the puzzle: first approach without regex
-func parseNumbers(_ input: String) -> ([Int],[Int]) {
-    var xs = [Int]();
-    var ys = [Int]();
-
-    let lines = input.components(separatedBy: "\n");
-    for line in lines {
-        let nums = line.components(separatedBy: .whitespaces).compactMap{ Int($0) }
-        xs.append(nums[0])
-        ys.append(nums[1])
-    }
-    return (xs, ys)
-}
 func countOccurences(_ xs: [Int]) -> [Int:Int] {
-    return xs.reduce(into: [:]) { acc, x in
+    var acc: [Int: Int] = [:]
+    acc.reserveCapacity(xs.count)
+    
+    return xs.reduce(into: acc) { acc, x in
         acc[x, default: 0] += 1
     }
 }
 
 func day1() -> (Int, Int){
-    var (xs, ys) = parseNumbersRegex(puzzle_1)
+    // let start = Date()
+    var (xs, ys) = parseNumbers(puzzle_1)
+    // let parsed = Date().timeIntervalSince(start)
     xs.sort()
     ys.sort()
+    // let sorted = Date().timeIntervalSince(start)
 
     let dist0 = zip(xs, ys).reduce(0) { acc, pair in
         let (x, y) = pair
         return acc + abs(x - y)
     }
+    // let comp0 = Date().timeIntervalSince(start)
     let yOcc = countOccurences(ys)
     let dist1 = xs.reduce(0) {acc, x in 
         return acc + x * yOcc[x, default: 0]
     }
+    // let comp1 = Date().timeIntervalSince(start)
+    // print(String(format: "parsed: %.4f, sorted: %.4f, comp0: %.4f, comp1: %.4f", Double(parsed)*1000, Double(sorted)*1000, Double(comp0)*1000, Double(comp1)*1000))
     return (dist0, dist1)
 }
-
+   
 let puzzle_1 = """
 38665   13337
 84587   21418

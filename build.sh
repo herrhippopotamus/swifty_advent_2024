@@ -1,2 +1,2 @@
 # swift build --configuration release
-swift build --configuration release -Xswiftc -Ounchecked
+swift build --configuration release #-Xswiftc -Ounchecked
