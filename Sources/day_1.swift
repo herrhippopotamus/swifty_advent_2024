@@ -1,36 +1,31 @@
 import Foundation
 import Algorithms
 
+let linefeed = UInt8(ascii: "\n")
+let space = UInt8(ascii: " ")
+
 func parseNumbers(_ input: String) -> ([Int],[Int]) {
-    var xs = [Int]()
-    var ys = [Int]()
+    var xs = [Int]();
+    var ys = [Int]();
 
     xs.reserveCapacity(1000)
     ys.reserveCapacity(1000)
-    var xsTurn = true
-    
+
     input.utf8.withContiguousStorageIfAvailable { data in
-        var start = 0
-        for i in 0..<data.endIndex {
-            if (data[i] == 32 || data[i] == 10) {
-                if start < i {
-                    let num = Int(
-                        String(decoding: UnsafeBufferPointer(rebasing: data[start..<i]), as: UTF8.self)
-                    )!
-                    
-                    if xsTurn {
-                        xs.append(num)
-                    }else{
-                        ys.append(num)
-                    }
-                    xsTurn.toggle()
-                }
-                start = i + 1
+        for line in data.lazy.split(separator: linefeed) {
+            var integers = line.lazy.split(separator: space).makeIterator()
+    
+            if let x = Int(String(decoding: integers.next()!, as: UTF8.self)){
+                xs.append(x)
+            }
+            if let y = Int(String(decoding: integers.next()!, as: UTF8.self)){
+                ys.append(y)
             }
         }
-    }
+    }!
     return (xs, ys)
 }
+
 func countOccurences(_ xs: [Int]) -> [Int:Int] {
     var acc: [Int: Int] = [:]
     acc.reserveCapacity(xs.count)
@@ -58,7 +53,6 @@ func day1() -> (Int, Int){
         return acc + x * yOcc[x, default: 0]
     }
     // let comp1 = Date().timeIntervalSince(start)
-    // print(String(format: "parsed: %.4f, sorted: %.4f, comp0: %.4f, comp1: %.4f", Double(parsed)*1000, Double(sorted)*1000, Double(comp0)*1000, Double(comp1)*1000))
     return (dist0, dist1)
 }
    
