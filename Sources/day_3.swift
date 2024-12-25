@@ -1,6 +1,6 @@
 import Foundation
 
-class Day3 {
+class Day3: Day {
     let mulPattern: Regex<AnyRegexOutput>
     let instrPattern: Regex<AnyRegexOutput>
 
@@ -25,11 +25,11 @@ class Day3 {
         return puzzle.replacing(instrPattern, with: "")
     }
 
-    func eval(_ puzzle: String = puzzle_3) -> (Int, Int) {
-        var vals = self.parse(puzzle)
+    func eval() -> (Int, Int) {
+        var vals = self.parse(puzzle_3)
         let part1 = vals.map({ $0.0 * $0.1 }).reduce(0, +)
 
-        vals = self.parse(self.removeDonts(puzzle))
+        vals = self.parse(self.removeDonts(puzzle_3))
         let part2 = vals.map({ $0.0 * $0.1 }).reduce(0, +)
         assert(part1 > part2)
 

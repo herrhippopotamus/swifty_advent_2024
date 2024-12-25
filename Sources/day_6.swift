@@ -38,7 +38,7 @@ struct Offset {
     }
 }
 
-enum Pawn {
+enum Pawn: Equatable {
     case field, blockage(Bool), visited
 }
 struct Position {
@@ -79,16 +79,17 @@ class Trapper: CustomStringConvertible {
     }
     func findTraps() {    
         for i in 0..<grid.count {
-            switch grid[i] {
-                case .field:
-                    var trappedGrid = grid.clone()
-                    trappedGrid[i] = .blockage(true)
-                    var board = newBoard(grid: trappedGrid)
-                    board.play()
-                    if board.trapped {
-                        traps.append(i)
-                    }
-                default: ()
+            if grid[i] == .field && i != initPos.offset {
+            // if Pawn wasn't marked as Equatable, the following
+            // 'if case'-statement would have to be used for comparison:
+            // if case .field = grid[i], i != initPos.offset {
+                var trappedGrid = grid.clone()
+                trappedGrid[i] = .blockage(true)
+                var board = newBoard(grid: trappedGrid)
+                board.play()
+                if board.trapped {
+                    traps.append(i)
+                }
             }
         }
     }
@@ -226,7 +227,7 @@ enum Direction: CustomStringConvertible {
         }
     }
 }
-class Day6 {
+class Day6: Day {
     var dirRgx: Regex<AnyRegexOutput>
     let log: Bool
 
@@ -234,8 +235,8 @@ class Day6 {
         dirRgx = try Regex("[<,>,^,v]")
         self.log = log
     }
-    func eval(_ puzzle: String = puzzle_6) throws -> (Int, Int) {
-        var board = try parseBoard(puzzle)
+    func eval() throws -> (Int, Int) {
+        var board = try parseBoard(puzzle_6)
 
         let trapper = Trapper(grid: board.board.clone(), cols: board.cols, initPos: board.initPos)
 

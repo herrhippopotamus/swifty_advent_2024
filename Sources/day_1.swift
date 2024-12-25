@@ -4,56 +4,59 @@ import Algorithms
 let linefeed = UInt8(ascii: "\n")
 let space = UInt8(ascii: " ")
 
-func parseNumbers(_ input: String) -> ([Int],[Int]) {
-    var xs = [Int]();
-    var ys = [Int]();
+class Day1: Day {
 
-    xs.reserveCapacity(1000)
-    ys.reserveCapacity(1000)
+    func parseNumbers(_ input: String) -> ([Int],[Int]) {
+        var xs = [Int]();
+        var ys = [Int]();
 
-    input.utf8.withContiguousStorageIfAvailable { data in
-        for line in data.lazy.split(separator: linefeed) {
-            var integers = line.lazy.split(separator: space).makeIterator()
-    
-            if let x = Int(String(decoding: integers.next()!, as: UTF8.self)){
-                xs.append(x)
+        xs.reserveCapacity(1000)
+        ys.reserveCapacity(1000)
+
+        input.utf8.withContiguousStorageIfAvailable { data in
+            for line in data.lazy.split(separator: linefeed) {
+                var integers = line.lazy.split(separator: space).makeIterator()
+        
+                if let x = Int(String(decoding: integers.next()!, as: UTF8.self)){
+                    xs.append(x)
+                }
+                if let y = Int(String(decoding: integers.next()!, as: UTF8.self)){
+                    ys.append(y)
+                }
             }
-            if let y = Int(String(decoding: integers.next()!, as: UTF8.self)){
-                ys.append(y)
-            }
+        }!
+        return (xs, ys)
+    }
+
+    func countOccurences(_ xs: [Int]) -> [Int:Int] {
+        var acc: [Int: Int] = [:]
+        acc.reserveCapacity(xs.count)
+        
+        return xs.reduce(into: acc) { acc, x in
+            acc[x, default: 0] += 1
         }
-    }!
-    return (xs, ys)
-}
-
-func countOccurences(_ xs: [Int]) -> [Int:Int] {
-    var acc: [Int: Int] = [:]
-    acc.reserveCapacity(xs.count)
-    
-    return xs.reduce(into: acc) { acc, x in
-        acc[x, default: 0] += 1
     }
-}
 
-func day1() -> (Int, Int){
-    // let start = Date()
-    var (xs, ys) = parseNumbers(puzzle_1)
-    // let parsed = Date().timeIntervalSince(start)
-    xs.sort()
-    ys.sort()
-    // let sorted = Date().timeIntervalSince(start)
+    func eval() throws -> (Int, Int) {
+        // let start = Date()
+        var (xs, ys) = parseNumbers(puzzle_1)
+        // let parsed = Date().timeIntervalSince(start)
+        xs.sort()
+        ys.sort()
+        // let sorted = Date().timeIntervalSince(start)
 
-    let dist0 = zip(xs, ys).reduce(0) { acc, pair in
-        let (x, y) = pair
-        return acc + abs(x - y)
+        let dist0 = zip(xs, ys).reduce(0) { acc, pair in
+            let (x, y) = pair
+            return acc + abs(x - y)
+        }
+        // let comp0 = Date().timeIntervalSince(start)
+        let yOcc = countOccurences(ys)
+        let dist1 = xs.reduce(0) {acc, x in 
+            return acc + x * yOcc[x, default: 0]
+        }
+        // let comp1 = Date().timeIntervalSince(start)
+        return (dist0, dist1)
     }
-    // let comp0 = Date().timeIntervalSince(start)
-    let yOcc = countOccurences(ys)
-    let dist1 = xs.reduce(0) {acc, x in 
-        return acc + x * yOcc[x, default: 0]
-    }
-    // let comp1 = Date().timeIntervalSince(start)
-    return (dist0, dist1)
 }
    
 let puzzle_1 = """

@@ -1,59 +1,61 @@
 import Foundation
 
-func day2() -> (Int, Int) {
-    class Report {
-        let report: [Int]
-        let index: Int
-        var valid = false
-        init(report: [Int], index: Int) {
-            self.report = report
-            self.index = index
-        }
-        func validate(_ relaxed: Bool = false) -> Report {
-            let acc = report[0] < report[report.count - 1]
-            func isInvalid(_ x: Int, _ y: Int) -> Bool {
-                return x == y ||
-                    (acc ? x >= y : x <= y) ||
-                    abs(x - y) > 3
+class Day2: Day {
+    func eval() throws -> (Int, Int) {
+        class Report {
+            let report: [Int]
+            let index: Int
+            var valid = false
+            init(report: [Int], index: Int) {
+                self.report = report
+                self.index = index
             }
-            func invalidIndexes(rep: [Int]) -> [Int] {
-                return zip(rep, rep[1...]).enumerated().filter({
-                    let (x, y) = $0.1
-                    return isInvalid(x, y)
-                }).map{$0.0}
-            }
-            let iis = invalidIndexes(rep: report)
-            if iis.count == 0 {
-                valid = true
-            }else if relaxed {
-                for ii in iis {
-                    let reducedReport = report[..<ii] + report[(ii+1)...]
-                    if invalidIndexes(rep: Array(reducedReport)).count == 0 {
-                        valid = true
-                        return self
+            func validate(_ relaxed: Bool = false) -> Report {
+                let acc = report[0] < report[report.count - 1]
+                func isInvalid(_ x: Int, _ y: Int) -> Bool {
+                    return x == y ||
+                        (acc ? x >= y : x <= y) ||
+                        abs(x - y) > 3
+                }
+                func invalidIndexes(rep: [Int]) -> [Int] {
+                    return zip(rep, rep[1...]).enumerated().filter({
+                        let (x, y) = $0.1
+                        return isInvalid(x, y)
+                    }).map{$0.0}
+                }
+                let iis = invalidIndexes(rep: report)
+                if iis.count == 0 {
+                    valid = true
+                }else if relaxed {
+                    for ii in iis {
+                        let reducedReport = report[..<ii] + report[(ii+1)...]
+                        if invalidIndexes(rep: Array(reducedReport)).count == 0 {
+                            valid = true
+                            return self
+                        }
                     }
                 }
+                return self
             }
-            return self
         }
-    }
-    func parseReports(puzzle: String) -> [Report] {
-        var reps = [Report]()
-        reps.reserveCapacity(1000)
+        func parseReports(puzzle: String) -> [Report] {
+            var reps = [Report]()
+            reps.reserveCapacity(1000)
 
-        for (index, line) in puzzle.split(separator: "\n").enumerated() {
-            reps.append(Report(
-                report: line.split(separator: " ").map{Int($0)!},
-                index: index))
+            for (index, line) in puzzle.split(separator: "\n").enumerated() {
+                reps.append(Report(
+                    report: line.split(separator: " ").map{Int($0)!},
+                    index: index))
+            }
+
+            return reps
         }
-
-        return reps
+        let reports = parseReports(puzzle: puzzle_2)
+        let validCount1 = reports.map({$0.validate()}).filter{$0.valid}.count
+        let validCount2 = reports.map({$0.validate(true)}).filter{$0.valid}.count
+        
+        return (validCount1, validCount2)
     }
-    let reports = parseReports(puzzle: puzzle_2)
-    let validCount1 = reports.map({$0.validate()}).filter{$0.valid}.count
-    let validCount2 = reports.map({$0.validate(true)}).filter{$0.valid}.count
-    
-    return (validCount1, validCount2)
 }
 
 

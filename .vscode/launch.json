@@ -4,42 +4,6 @@
             "type": "lldb",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:advent_of_code}",
-            "name": "Debug avc_2024",
-            "program": "${workspaceFolder:advent_of_code}/.build/debug/avc_2024",
-            "preLaunchTask": "swift: Build Debug avc_2024"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "args": [],
-            "cwd": "${workspaceFolder:advent_of_code}",
-            "name": "Release avc_2024",
-            "program": "${workspaceFolder:advent_of_code}/.build/release/avc_2024",
-            "preLaunchTask": "swift: Build Release avc_2024"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "args": [],
-            "cwd": "${workspaceFolder:advent_of_code}",
-            "name": "Debug aoc_2024",
-            "program": "${workspaceFolder:advent_of_code}/.build/debug/aoc_2024",
-            "preLaunchTask": "swift: Build Debug aoc_2024"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "args": [],
-            "cwd": "${workspaceFolder:advent_of_code}",
-            "name": "Release aoc_2024",
-            "program": "${workspaceFolder:advent_of_code}/.build/release/aoc_2024",
-            "preLaunchTask": "swift: Build Release aoc_2024"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "args": [],
             "cwd": "${workspaceFolder:swift}",
             "name": "Debug aoc",
             "program": "${workspaceFolder:swift}/.build/debug/aoc",
