@@ -10,15 +10,7 @@ class Day8: Day {
     class Node: CustomStringConvertible {
         var values: [Int]
         let capacity: Int
-        var level: UInt8 = 0
-        var left: Node?
-        var right: Node?
         var id: Int = 0
-        var log = false
-
-        enum Compaction {
-            case eager, relaxed
-        }
 
         init(capacity: Int) {
             self.capacity = capacity
@@ -32,93 +24,82 @@ class Day8: Day {
         var isFull: Bool {
             return values.count == capacity
         }
+        var isEmpty: Bool {
+            return values.isEmpty
+        }
 
-        static func + (left: Node, right: Node) -> Node {
+        var description: String {
+            return "Node(id: \(id), cnt: \(values.count), capacity: \(capacity))"
+        }
+
+        func popValue() -> Int? {
+            return values.popLast()
+        }
+        func insert(value: Int) {
+            values.append(value)
+        }
+        var freeCapacity: Int {
+            return capacity - values.count
+        }
+    }
+    class Nodes: CustomStringConvertible {
+        var nodes: [Node] = []
+        var log = false
+        var root: Node?
+
+        var description: String {
+            return "[" + nodes.map{ "\($0)" }.joined(by: ", ")  + "]"
+        }
+
+        enum Compaction {
+            case eager, relaxed
+        }
+
+        
+
+        static func + (left: Nodes, right: Node) -> Nodes {
             return left.add(right)
         }
-        static func += (left: Node, right: Node) {
+        static func += (left: Nodes, right: Node) {
             let _ = left.add(right)
         }
-        func add(_ newNode: Node) -> Node {
-            let root = self
-            var nodes = [root]
-            while !nodes.isEmpty {
-                let parent = nodes.removeFirst()
-                if let left = parent.left {
-                    nodes.append(left)
-                } else {
-                    newNode.level = parent.level + 1
-                    parent.left = newNode
-                    break
-                }
-                if let right = parent.right {
-                    nodes.append(right)
-                } else {
-                    newNode.level = parent.level + 1
-                    parent.right = newNode
-                    break
-                }
-            }
-            return root
+        func add(_ newNode: Node) -> Nodes {
+            nodes.append(newNode)
+            return self
         }
         // searches the first node that is not full, i. e. has capacity to add new entries
         func unsaturaedNode() -> Node? {
-            var nodes = [self]
-            while !nodes.isEmpty {
-                let node = nodes.removeFirst()
+            for node in nodes {
                 if !node.isFull {
                     return node
-                }
-                if let left = node.left {
-                    nodes.append(left)
-                }
-                if let right = node.right {
-                    nodes.append(right)
                 }
             }
             return nil
         }
-        var hasChildren: Bool {
-            return left != nil || right != nil
-        }
-        var isEmpty: Bool {
-            return values.isEmpty
-        }
-        func lastNonEmptyNode() -> Node {
-            var nodes = [self]
-            var children: [Node] = []
-            var last = self
-            repeat {
-                children = []
-                while !nodes.isEmpty {
-                    let node = nodes.removeFirst()
-                    if !node.isEmpty {
-                        last = node
-                    }
-                    if let left = node.left {
-                        children.append(left)
-                    }
-                    if let right = node.right {
-                        children.append(right)
-                    }
+        
+        func lastNonEmptyNode() -> Node? {
+            for node in nodes.reversed() {
+                if !node.isEmpty {
+                    return node
                 }
-                nodes = children
-            } while !children.isEmpty
-            return last
+            }
+            return nil
         }
         func compacting(variant compaction: Compaction) {
             switch compaction {
                 case .eager:
                     while let unsaturated = unsaturaedNode() {
-                        let last = lastNonEmptyNode()
-                        if last === unsaturated {
+                        if let last = lastNonEmptyNode() {
+                            if last === unsaturated {
+                                break
+                            }
+                            if log { print("compacting \(last.id) into \(unsaturated.id)") }
+                            unsaturated.insert(value: last.popValue()!)
+                        }else{
                             break
                         }
-                        if log { print("compacting \(last.id) into \(unsaturated.id)") }
-                        unsaturated.insert(value: last.popValue()!)
                     }
                 case .relaxed:
-                    let nodes = toArr()
                     for (id, node) in nodes.enumerated().reversed() {
                         for i in 0..<id {
                             let unsaturated = nodes[i]
@@ -133,62 +114,9 @@ class Day8: Day {
                     }
             }
         }
-        var freeCapacity: Int {
-            return capacity - values.count
-        }
-        func toArr() -> [Node] {
-            var arr: [Node] = []
-            var nodes = [self]
-            while !nodes.isEmpty {
-                let node = nodes.removeFirst()
-                arr.append(node)
-                if let left = node.left {
-                    nodes.append(left)
-                }
-                if let right = node.right {
-                    nodes.append(right)
-                }
-            }
-            return arr
-        }
-    
-        func popValue() -> Int? {
-            return values.popLast()
-        }
-        func insert(value: Int) {
-            values.append(value)
-        }
-        var description: String {
-            var descr = ""
-            var nodes = [self]
-            var level = 0
-            while !nodes.isEmpty {
-                let node = nodes.removeFirst()
-                if let left = node.left {
-                    nodes.append(left)
-                }
-                if let right = node.right {
-                    nodes.append(right)
-                }
-                if node.level > level {
-                    level += 1
-                    descr += "\n"
-                }
-                descr += "Node(id: \(node.id), cnt: \(node.values.count), cap: \(node.capacity))\t"
-            }
-            return descr
-        }
         var memoryLayout: String {
             var layout = ""
-            var nodes = [self]
-            while !nodes.isEmpty {
-                let node = nodes.removeFirst()
-                if let left = node.left {
-                    nodes.append(left)
-                }
-                if let right = node.right {
-                    nodes.append(right)
-                }
+            for node in nodes {
                 layout += node.values.map{ String($0) }.joined(by: "")
                 layout += String(repeating: ".", count: node.capacity - node.values.count)
             }
@@ -196,16 +124,8 @@ class Day8: Day {
         }
         var hash: Int {
             var h = 0
-            var nodes = [self]
             var i = 0
-            while !nodes.isEmpty {
-                let node = nodes.removeFirst()
-                if let left = node.left {
-                    nodes.append(left)
-                }
-                if let right = node.right {
-                    nodes.append(right)
-                }
+            for node in nodes {
                 for value in node.values {
                     h += value * i
                     i += 1
@@ -219,36 +139,37 @@ class Day8: Day {
     }
 
     func eval() throws -> (Int,Int) {
-        var root = parsePuzzle(puzzle_8)!
+        var nodes = parsePuzzle(puzzle_8)
         if log {
-            print("root: \(root)")
-            print("memoryLayout: \(root.memoryLayout)")
+            print("nodes: \(nodes)")
+            print("memoryLayout: \(nodes.memoryLayout)")
         }
 
-        root.compacting(variant: .eager)
+        nodes.compacting(variant: .eager)
         if log {
-            print("root after compacting: \(root)")
-            print("memoryLayout: \(root.memoryLayout)")
+            print("root after compacting: \(nodes)")
+            print("memoryLayout: \(nodes.memoryLayout)")
         }
-        let eagerHash = root.hash
-        if log {print("hash: \(root.hash)")}
+        let eagerHash = nodes.hash
+        if log {print("hash: \(nodes.hash)")}
         
 
-        root = parsePuzzle(puzzle_8)!
+        nodes = parsePuzzle(puzzle_8)
         if log {print("reinitialized root - starting 2nd compacting")}
 
-        root.compacting(variant: .relaxed)
-        let relaxedHash = root.hash
+        nodes.compacting(variant: .relaxed)
+        let relaxedHash = nodes.hash
         if log {
-            print("root after compacting: \(root)")
-            print("memoryLayout: \(root.memoryLayout)")
-            print("hash: \(root.hash)")
+            print("root after compacting: \(nodes)")
+            print("memoryLayout: \(nodes.memoryLayout)")
+            print("hash: \(nodes.hash)")
         }
 
         return (eagerHash, relaxedHash)
     }
-    func parsePuzzle(_ puzzle: String) -> Node? {
-        var root: Node? = nil
+    func parsePuzzle(_ puzzle: String) -> Nodes {
+        let nodes = Nodes()
+        nodes.log = log
         puzzle.utf8.withContiguousStorageIfAvailable{ data in 
             for (i, d) in data.enumerated() {
                 let value = d - 48 // 48 == index of 'a' in ASCII
@@ -259,15 +180,10 @@ class Day8: Day {
                     node = Node(capacity: Int(value))
                 }
                 node.id = i
-                node.log = log
-                if let root = root {
-                    root += node
-                }else{
-                    root = node
-                }
+                nodes += node
             }
         }
-        return root
+        return nodes
     }
 }
 // let puzzle_8 = "2333133121414131402"

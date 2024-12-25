@@ -12,8 +12,10 @@ logDay(index: 7, day: Day7(log: false))
 logDay(index: 8, day: Day8(log: false))
 
 func logDay(index: UInt8, day: Day){
+    let start = Date()
     let result = try! day.eval()
-    print(String(format: "Day \(index) - 1st part: \(result.0), 2nd part: \(result.1)"))
+    let elapsed = Date().timeIntervalSince(start)
+    print(String(format: "Day \(index) - 1st part: \(result.0), 2nd part: \(result.1) - took: \(elapsed)"))
 }
 // try testPerformance()
 
