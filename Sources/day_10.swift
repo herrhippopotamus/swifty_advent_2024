@@ -61,8 +61,11 @@ class Day10: Day {
         func evolve() -> [Evolution] {
             // print("evolve: \(number)")
             if isEvenlySplittable(number) {
-                let splits = splitNumbers()
-                return Array(splits.map{Evolution(number: $0, factor: factor)})
+                let (left, right) = splitNumbers()
+                return [
+                    Evolution(number: left, factor: factor),
+                    Evolution(number: right, factor: factor),
+                ]
             }else{
                 switch number {
                     case 0: number = 1
@@ -71,13 +74,13 @@ class Day10: Day {
             }
             return [self]
         }
-        func splitNumbers() -> [Int] {
-            let numStr = number < 10 ? "0\(number)" : String(number)
-            // print("num: \(number), numStr: \(numStr)")
-            let half = numStr.count / 2
-            let leftVal = Int(String(numStr.prefix(half)))!
-            let rightVal = Int(String(numStr.suffix(half)))!
-            return [leftVal, rightVal]
+    
+        func splitNumbers() -> (Int, Int) {
+            let exponent = Int(ceil(log10(Double(number)))) / 2
+            let divisor = Int(pow(10.0, Double(max(exponent, 1))))
+            let leftVal = number / divisor
+            let rightVal = number % divisor
+            return (leftVal, rightVal)
         }
         func isEvenlySplittable(_ val: Int) -> Bool {
             let divisor = val - val % 10
@@ -117,7 +120,6 @@ class Day10: Day {
         for num in puzzle.split(separator: " ") {
             numbers.append( Int(num)! )
         }
-        // print("puzzle numbers: ", numbers)
         return numbers
     }
 }
