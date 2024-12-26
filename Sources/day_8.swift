@@ -48,7 +48,7 @@ class Day8: Day {
         var root: Node?
 
         var description: String {
-            return "[" + nodes.map{ "\($0)" }.joined(by: ", ")  + "]"
+            return "[" + nodes.map{ "\($0)" }.joined(separator: ", ")  + "]"
         }
 
         enum Compaction {

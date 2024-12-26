@@ -10,6 +10,8 @@ logDay(index: 3, day: try Day3())
 logDay(index: 6, day: try Day6(log: false))
 logDay(index: 7, day: Day7(log: false))
 logDay(index: 8, day: Day8(log: false))
+logDay(index: 9, day: Day9(log: false))
+logDay(index: 10, day: Day10(log: false))
 
 func logDay(index: UInt8, day: Day){
     let start = Date()
